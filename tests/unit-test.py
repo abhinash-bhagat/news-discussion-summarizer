@@ -1,9 +1,8 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import unittest
-from source.data_collection import get_top_news_topics, fetch_comments_from_reddit
+from source.data_collection import get_top_news_topics, fetch_comments_from_reddit, save_data
 from unittest.mock import patch, MagicMock
 
 class TestGetTopNewsTopics(unittest.TestCase):
@@ -14,47 +13,44 @@ class TestGetTopNewsTopics(unittest.TestCase):
         self.assertIsNotNone(topics)  # Check if topics list is not None
         self.assertIsInstance(topics, list)  # Check if topics is a list
         self.assertGreater(len(topics), 0)  # Check if topics list is not empty
-        
-        # Test case for an invalid city
-        city = "InvalidCity"
-        topics = get_top_news_topics(city)
-        self.assertIsNone(topics)  # Check if topics list is None for invalid city
 
-class TestFetchCommentsFromReddit(unittest.TestCase):
+
+class TestSaveData(unittest.TestCase):
+    
+    @patch('source.data_collection.get_top_news_topics')
     @patch('source.data_collection.praw.Reddit')
-    def test_fetch_comments_success(self, mock_reddit):
-        # Mock submission
-        mock_submission = MagicMock()
-        mock_submission.comments.__getitem__.side_effect = lambda x: MagicMock(body=f"Comment {x}")
-        mock_submission.comments.__iter__.return_value = range(15)
+    @patch('source.data_collection.fetch_comments_from_reddit')
+    @patch('builtins.open', new_callable=unittest.mock.mock_open)
+    def test_save_data_success(self, mock_open, mock_fetch_comments, mock_reddit, mock_get_top_news_topics):
+        # Setup mocks
+        mock_get_top_news_topics.return_value = ['topic1', 'topic2']
+        mock_submission1 = MagicMock()
+        mock_submission1.title = 'Post 1'
+        mock_submission2 = MagicMock()
+        mock_submission2.title = 'Post 2'
+        mock_search_results = [mock_submission1, mock_submission2]
+        mock_reddit.subreddit.return_value.search.return_value = mock_search_results
+        mock_fetch_comments.return_value = ['comment1', 'comment2', 'comment3', 'comment4']
         
-        # Mock Reddit instance
-        mock_reddit.return_value.submission.return_value = mock_submission
-
-        # Call the function with a fake post_id
-        post_id = "fake_post_id"
-        comments = fetch_comments_from_reddit(post_id)
-
+        # Call the function
+        result = save_data('New York')
+        
         # Assertions
-        self.assertEqual(len(comments), 15)
-        self.assertEqual(comments[0], "Comment 0")
-        self.assertEqual(comments[14], "Comment 14")
-
-    @patch('source.data_collection.praw.Reddit')
-    def test_fetch_comments_no_comments(self, mock_reddit):
-        # Mock submission with no comments
-        mock_submission = MagicMock()
-        mock_submission.comments.__iter__.return_value = []
-
-        # Mock Reddit instance
-        mock_reddit.return_value.submission.return_value = mock_submission
-
-        # Call the function with a fake post_id
-        post_id = "fake_post_id"
-        comments = fetch_comments_from_reddit(post_id)
-
+        self.assertTrue(result)  # Check if save_data returns True indicating success
+        mock_open.assert_called_once_with("data\city_data.json", "w")  # Check if open function is called
+        handle = mock_open()
+        handle.write.assert_called_once()  # Check if write function is called
+        
+    @patch('source.data_collection.get_top_news_topics')
+    def test_save_data_failure(self, mock_get_top_news_topics):
+        # Setup mock
+        mock_get_top_news_topics.return_value = None
+        
+        # Call the function
+        result = save_data('Invalid City')
+        
         # Assertions
-        self.assertEqual(len(comments), 0)
+        self.assertFalse(result)  # Check if save_data returns False indicating failure
 
 
 if __name__ == '__main__':

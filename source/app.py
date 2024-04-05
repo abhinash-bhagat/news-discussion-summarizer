@@ -26,27 +26,27 @@ def main():
     if st.button("Analyze Discussions"):
         # Collect NEWS of city & save it as json
         st.write("Getting NEWS headings...")
-        save_data(city_name)
-        st.write("NEWS data saved...")
-        st.write("Data Loading...")
+        if save_data(city_name):
+            # Load JSON data
+            json_file_path = 'data\city_data.json'
+            data = load_json_data(json_file_path)
 
-        # Load JSON data
-        json_file_path = 'data\city_data.json'
-        data = load_json_data(json_file_path)
+            # Check if data is available
+            if data:
+                st.write(f"Analysis Result of: {city_name}")
+                for topic, comments_info in data.items():
+                    # Summarize diverse viewpoints
+                    positive_summary, negative_summary, neutral_summary = summarize_viewpoints(comments_info)
 
-        # Check if data is available
-        if data:
-            st.write(f"Analysis Result of: {city_name}")
-            for topic, comments_info in data.items():
-                # Summarize diverse viewpoints
-                positive_summary, negative_summary, neutral_summary = summarize_viewpoints(comments_info)
+                    # Present the information
+                    with st.container():
+                        st.markdown(f"<h5 style='text-align: center; background-color: #dff9ff; color: black; border-radius: 10px; margin-bottom: 25px;'>Topic: {topic}<br><br>Positive Viewpoints:<br>{positive_summary}<br><br>Negative Viewpoints:<br>{negative_summary}<br><br>Neutral Viewpoints:<br>{neutral_summary}</h5>", unsafe_allow_html=True)
+            else:
+                st.error("Failed to load JSON data.")
 
-                # Present the information
-                with st.container():
-                    st.markdown(f"<h5 style='text-align: center; background-color: #dff9ff; color: black; border-radius: 10px; margin-bottom: 25px;'>Topic: {topic}<br><br>Positive Viewpoints:<br>{positive_summary}<br><br>Negative Viewpoints:<br>{negative_summary}<br><br>Neutral Viewpoints:<br>{neutral_summary}</h5>", unsafe_allow_html=True)
         else:
-            st.error("Failed to load JSON data.")
+            st.error("Invalid City or No News Covered.")
 
-# Run the main function to start the Streamlit app
+# Run the main function to start the Streamlit app  
 if __name__ == "__main__":
     main()

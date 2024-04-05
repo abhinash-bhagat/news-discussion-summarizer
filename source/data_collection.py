@@ -41,7 +41,6 @@ def fetch_comments_from_reddit(post_id):
     
     return comments
 
-
 # Saving categorized comments as json
 from textblob import TextBlob
 # Function to identify viewpoints (positive, negative, neutral)
@@ -95,14 +94,14 @@ def save_data(city_name):
                     else:
                         print(f"No comments retrieved for post: {submission.title} (Subreddit: {subreddit_name})")
         
-        # Print the extracted data
-        # print("Extracted data:")
-        # print(extracted_data)
         import json
         # Save the extracted data to a JSON file
         with open("data\city_data.json", "w") as json_file:
             json.dump(extracted_data, json_file, indent=4)
             
-        print("Data saved successfully to: extracted_data.json")
+        print("Data saved successfully.")
+        return True
+    
     else:
         print("Failed to fetch news topics.")
+        return False
