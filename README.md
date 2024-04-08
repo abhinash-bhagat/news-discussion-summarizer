@@ -1,6 +1,6 @@
 # Approach
 
-
+! Disclaimer: It takes around 1.5-2 min to show results as it fetches the latest NEWS every time the "Analyze Discussions" button is clicked. 
 
 ## General Strategy:
 The general strategy involved in this project was to gather and analyze discussions from Reddit related to various news topics. The process included fetching top news topics based on a specified city using NEWS API, searching for related posts on Reddit, extracting comments from these posts, categorizing the comments into positive, negative, and neutral viewpoints, and summarizing the discussions.
@@ -24,5 +24,5 @@ The success of the project was evaluated based on the following metrics:
     - Clone the repository to your local machine.
     - Install the required dependencies listed in the requirements.txt file.
     - Run the Streamlit app using the command streamlit run app.py.
-    - Enter the desired city name and click on the "Analyze Discussions" button.
+    - Enter the desired city name and click the "Analyze Discussions" button.
     - View the summarized discussions displayed on the webpage.
